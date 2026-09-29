@@ -22,14 +22,29 @@ export default function Home() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
             AI
           </div>
-          <h1 className="text-base font-semibold text-slate-900">Research Workspace</h1>
+          <h1 className="text-base font-semibold text-slate-900">Workspace</h1>
         </div>
-        <button
-          onClick={() => setSidebarOpen((v) => !v)}
-          className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          {sidebarOpen ? "Đóng" : "Tài liệu"}
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* Nút Đăng xuất hiện trên SP */}
+          <button
+            onClick={handleLogout}
+            className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+            title="Đăng xuất"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+
+          {/* Nút đóng/mở tài liệu cũ của bạn */}
+          <button
+            onClick={() => setSidebarOpen((v) => !v)}
+            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            {sidebarOpen ? "Đóng" : "Tài liệu"}
+          </button>
+        </div>
       </header>
 
       <aside
@@ -48,7 +63,8 @@ export default function Home() {
         <DocumentUploader />
         <DocumentList />
 
-        <div className="mt-auto pt-4 border-t border-slate-100">
+        {/*Nút đăng xuất chỉ hiện trên PC còn ẩn trên SP*/}
+        <div className="mt-auto pt-4 border-t border-slate-100 hidden md:block">
           <button
             onClick={handleLogout}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:text-red-600"
@@ -61,7 +77,17 @@ export default function Home() {
         </div>
       </aside>
 
-      <main className="min-h-0 min-w-0 flex-1 bg-slate-50">
+      <main
+        className="min-h-0 min-w-0 flex-1 bg-slate-50 relative"
+        onClick={() => {
+          // Nếu đang mở sidebar trên SP thì chạm vào khung chat sẽ tự đóng lại
+          if (sidebarOpen) setSidebarOpen(false);
+        }}
+      >
+        {sidebarOpen && (
+          <div className="absolute inset-0 z-10 bg-slate-900/10 md:hidden" />
+        )}
+
         <ChatWindow />
       </main>
     </div>
