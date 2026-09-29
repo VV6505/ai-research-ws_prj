@@ -99,7 +99,7 @@ export default function DocumentUploader() {
     }
 
     return (
-        <div className="border border-dashed border-gray-300 rounded-lg p-4">
+        <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 transition hover:border-indigo-300 hover:bg-indigo-50/40">
             <input
                 ref={inputRef}
                 type="file"
@@ -110,21 +110,25 @@ export default function DocumentUploader() {
             />
             <button
                 onClick={() => inputRef.current?.click()}
-                className="w-full py-2 px-4 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-200 transition hover:bg-indigo-700 active:scale-[0.98]"
             >
-                + Tải tài liệu lên (.txt, .pdf, .docx)
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Tải tài liệu lên
             </button>
+            <p className="mt-2 text-center text-xs text-slate-400">.txt · .pdf · .docx</p>
 
             {uploads.length > 0 && (
-                <ul className="mt-3 space-y-1 text-sm">
+                <ul className="mt-3 space-y-1.5 text-sm">
                     {uploads.map((u, i) => (
-                        <li key={i} className="flex items-center justify-between">
-                            <span className="truncate">{u.fileName}</span>
-                            {u.status === "uploading" && <span className="text-gray-400">Đang tải lên...</span>}
-                            {u.status === "extracting" && <span className="text-gray-400">Đang xử lý...</span>}
-                            {u.status === "done" && <span className="text-green-600">✓ Xong</span>}
+                        <li key={i} className="flex items-center justify-between rounded-md bg-white px-2.5 py-1.5 shadow-sm">
+                            <span className="truncate text-slate-700">{u.fileName}</span>
+                            {u.status === "uploading" && <span className="shrink-0 text-xs text-slate-400">Đang tải...</span>}
+                            {u.status === "extracting" && <span className="shrink-0 text-xs text-slate-400">Đang xử lý...</span>}
+                            {u.status === "done" && <span className="shrink-0 text-xs font-medium text-emerald-600">✓ Xong</span>}
                             {u.status === "error" && (
-                                <span className="text-red-600" title={u.errorMessage}>✕ Lỗi</span>
+                                <span className="shrink-0 text-xs font-medium text-red-500" title={u.errorMessage}>✕ Lỗi</span>
                             )}
                         </li>
                     ))}

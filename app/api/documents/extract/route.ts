@@ -40,10 +40,8 @@ export async function POST(request: Request) {
         let extractedText = "";
 
         if (name.toLowerCase().endsWith(".pdf")) {
-            // Thêm 'as any' để ép kiểu
-            const pdfParseModule = await import("pdf-parse");
-            const pdfParse = (pdfParseModule as any).default ?? pdfParseModule;
-            const result = await (pdfParse as (buf: Buffer) => Promise<{ text: string }>)(buffer);
+            const pdfParse = require("pdf-parse/lib/pdf-parse.js") as (buf: Buffer) => Promise<{ text: string }>;
+            const result = await pdfParse(buffer);
             extractedText = result.text;
         } else if (name.toLowerCase().endsWith(".docx")) {
             const mammoth = await import("mammoth");

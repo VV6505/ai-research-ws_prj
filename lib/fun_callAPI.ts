@@ -2,10 +2,9 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 // Danh sách model ưu tiên — thử lần lượt nếu model trước bị 503/429
 const MODELS = [
-    "gemini-3.8-flash",
+    "gemini-2.5-flash",
     "gemini-3.5-flash-lite",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro"
+    "gemini-3.6-flash",
 ];
 
 const RETRYABLE_CODES = [429, 503, 502, 500];
@@ -64,9 +63,7 @@ export async function askGemini(prompt: string) {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-        throw new Error(
-            "Thiếu GEMINI_API_KEY. Kiểm tra file .env.local và restart dev server."
-        );
+        throw new Error("Thiếu GEMINI_API_KEY. Kiểm tra file .env.local và restart dev server.");
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -87,4 +84,55 @@ export async function askGemini(prompt: string) {
     }
 
     throw lastError;
+}
+
+export async function* askGeminiStream(prompt: string) {
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        throw new Error("Thiếu GEMINI_API_KEY. Kiểm tra file .env.local và restart dev server.");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    let lastError: unknown;
+
+    for (const model of MODELS) {
+        try {
+            console.log(`[Gemini stream] Đang dùng model: ${model}`);
+            const stream = await ai.models.generateContentStream({
+                model,
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            summary: { type: Type.STRING },
+                            key_points: { type: Type.ARRAY, items: { type: Type.STRING } },
+                            risks: { type: Type.ARRAY, items: { type: Type.STRING } },
+                            actions: { type: Type.ARRAY, items: { type: Type.STRING } },
+                        },
+                        required: ["summary", "key_points", "risks", "actions"],
+                    },
+                },
+            });
+
+            let receivedAny = false;
+            for await (const chunk of stream) {
+                if (chunk.text) {
+                    receivedAny = true;
+                    yield chunk.text;
+                }
+            }
+            if (receivedAny) return;
+        } catch (err: unknown) {
+            lastError = err;
+            const code =
+                (err as { status?: number; code?: number })?.status ??
+                (err as { status?: number; code?: number })?.code;
+            console.warn(`[Gemini stream] Model ${model} thất bại (${code}), chuyển model tiếp theo...`);
+        }
+    }
+
+    throw lastError ?? new Error("Không có model nào phản hồi được.");
 }

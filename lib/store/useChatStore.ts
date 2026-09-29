@@ -9,6 +9,7 @@ export interface ChatMessage {
     structured?: Answer;
     rawResponse?: string;
     errorMessage?: string;
+    streamingText?: string;
 }
 
 interface ChatState {

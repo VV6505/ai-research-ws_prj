@@ -43,15 +43,19 @@ export default function DocumentList() {
 
     if (loading) {
         return (
-            <div className="space-y-2 animate-pulse">
-                <div className="h-10 bg-gray-100 rounded" />
-                <div className="h-10 bg-gray-100 rounded" />
+            <div className="space-y-2">
+                <div className="h-12 animate-pulse rounded-lg bg-slate-100" />
+                <div className="h-12 animate-pulse rounded-lg bg-slate-100" />
             </div>
         );
     }
 
     if (error) {
-        return <p className="text-sm text-red-600">Không tải được danh sách tài liệu: {error}</p>;
+        return (
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                Không tải được danh sách tài liệu: {error}
+            </p>
+        );
     }
 
     if (documents.length === 0) {
@@ -64,25 +68,38 @@ export default function DocumentList() {
     }
 
     return (
-        <ul className="space-y-1">
-            {documents.map((doc) => (
-                <li key={doc.id} className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2">
-                    <label className="flex items-center gap-2 min-w-0 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={selectedIds.includes(doc.id)}
-                            onChange={() => toggleSelected(doc.id)}
-                        />
-                        <span className="truncate text-sm">{doc.name}</span>
-                    </label>
-                    <button
-                        onClick={() => handleDelete(doc.id, doc.storage_path)}
-                        className="text-xs text-red-500 hover:underline shrink-0 ml-2"
-                    >
-                        Xoá
-                    </button>
-                </li>
-            ))}
-        </ul>
+        <div className="space-y-1.5">
+            <p className="px-1 text-xs font-medium uppercase tracking-wide text-slate-400">
+                Tài liệu ({documents.length})
+            </p>
+            <ul className="space-y-1.5">
+                {documents.map((doc) => {
+                    const isSelected = selectedIds.includes(doc.id);
+                    return (
+                        <li
+                            key={doc.id}
+                            className={`group flex items-center justify-between rounded-lg border px-3 py-2 transition ${isSelected ? "border-indigo-300 bg-indigo-50" : "border-slate-200 bg-white hover:border-slate-300"
+                                }`}
+                        >
+                            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5">
+                                <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => toggleSelected(doc.id)}
+                                    className="h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="truncate text-sm text-slate-700">{doc.name}</span>
+                            </label>
+                            <button
+                                onClick={() => handleDelete(doc.id, doc.storage_path)}
+                                className="shrink-0 text-xs text-slate-400 opacity-0 transition hover:text-red-500 group-hover:opacity-100"
+                            >
+                                Xoá
+                            </button>
+                        </li>
+                    );
+                })}
+            </ul>
+        </div>
     );
 }

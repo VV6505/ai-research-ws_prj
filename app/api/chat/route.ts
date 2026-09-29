@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { askGemini } from "@/lib/fun_callAPI";
+import { askGeminiStream } from "@/lib/fun_callAPI";
 import { parseAnswer } from "@/lib/schema";
 
 export async function POST(request: Request) {
@@ -63,7 +63,9 @@ ${context}
 
 Câu hỏi: ${question}
 
-Hãy trả lời theo đúng cấu trúc: tóm tắt (summary), các điểm chính (key_points), rủi ro nếu có (risks), hành động đề xuất (actions). Nếu không có rủi ro hoặc hành động cụ thể, để mảng rỗng.`;
+Hãy trả lời theo đúng cấu trúc: tóm tắt (summary), các điểm chính (key_points), rủi ro nếu có (risks), hành động đề xuất (actions).
+
+Nếu câu hỏi yêu cầu trích dẫn nguyên văn hoặc giải thích 1 chi tiết cụ thể, hãy đặt nội dung chính vào "summary", để key_points/risks/actions trống nếu không có nội dung phù hợp — không cố bịa thêm nội dung không liên quan chỉ để lấp đầy khuôn.`;
 
         let msgPlaceholder: { id: string } | null = null;
         let placeholderError: string | undefined;
@@ -99,52 +101,50 @@ Hãy trả lời theo đúng cấu trúc: tóm tắt (summary), các điểm ch�
             );
         }
 
-        try {
-            const rawText = await askGemini(prompt);
-            const structured = parseAnswer(rawText);
+        const encoder = new TextEncoder();
 
-            if (!structured) {
-                await supabase
-                    .from("messages")
-                    .update({ status: "error", raw_response: rawText, error_message: "Định dạng phản hồi không hợp lệ" })
-                    .eq("id", msgPlaceholder.id);
+        const stream = new ReadableStream({
+            async start(controller) {
+                let rawText = "";
+                try {
+                    for await (const chunk of askGeminiStream(prompt)) {
+                        rawText += chunk;
+                        controller.enqueue(encoder.encode(chunk));
+                    }
 
-                return NextResponse.json(
-                    {
-                        id: msgPlaceholder.id,
-                        conversationId: convId,
-                        status: "error",
-                        raw_response: rawText,
-                        error: "AI trả về định dạng không đúng chuẩn",
-                    },
-                    { status: 200 }
-                );
-            }
+                    const structured = parseAnswer(rawText);
 
-            await supabase
-                .from("messages")
-                .update({ status: "done", structured_response: structured })
-                .eq("id", msgPlaceholder.id);
+                    if (!structured) {
+                        await supabase
+                            .from("messages")
+                            .update({ status: "error", raw_response: rawText, error_message: "Định dạng phản hồi không hợp lệ" })
+                            .eq("id", msgPlaceholder.id);
+                    } else {
+                        await supabase
+                            .from("messages")
+                            .update({ status: "done", structured_response: structured })
+                            .eq("id", msgPlaceholder.id);
+                    }
+                } catch (err) {
+                    const message = err instanceof Error ? err.message : "Lỗi gọi AI";
+                    await supabase
+                        .from("messages")
+                        .update({ status: "error", error_message: message })
+                        .eq("id", msgPlaceholder.id);
+                    controller.enqueue(encoder.encode(JSON.stringify({ __error: message })));
+                } finally {
+                    controller.close();
+                }
+            },
+        });
 
-            return NextResponse.json({
-                id: msgPlaceholder.id,
-                conversationId: convId,
-                status: "done",
-                structured_response: structured,
-            });
-        } catch (aiError) {
-            const message = aiError instanceof Error ? aiError.message : "Lỗi gọi AI";
-
-            await supabase
-                .from("messages")
-                .update({ status: "error", error_message: message })
-                .eq("id", msgPlaceholder.id);
-
-            return NextResponse.json(
-                { id: msgPlaceholder.id, conversationId: convId, status: "error", error: message },
-                { status: 200 }
-            );
-        }
+        return new Response(stream, {
+            headers: {
+                "Content-Type": "text/plain; charset=utf-8",
+                "X-Message-Id": msgPlaceholder.id,
+                "X-Conversation-Id": convId,
+            },
+        });
     } catch (err) {
         const message = err instanceof Error ? err.message : "Lỗi không xác định";
         return NextResponse.json({ error: message }, { status: 500 });

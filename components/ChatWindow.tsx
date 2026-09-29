@@ -83,7 +83,12 @@ export default function ChatWindow() {
     }, [messages]);
 
     async function ask(localId: string, question: string, dbId?: string) {
-        updateMessage(localId, { status: "loading", errorMessage: undefined, rawResponse: undefined });
+        updateMessage(localId, {
+            status: "loading",
+            errorMessage: undefined,
+            rawResponse: undefined,
+            streamingText: "",
+        });
 
         try {
             const res = await fetch("/api/chat", {
@@ -96,30 +101,54 @@ export default function ChatWindow() {
                     messageId: dbId,
                 }),
             });
-            const data = await res.json();
 
-            if (!res.ok) throw new Error(data.error ?? "Lỗi máy chủ");
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error ?? "Lỗi máy chủ");
+            }
 
-            if (data.conversationId) setConversationId(data.conversationId);
+            const newConvId = res.headers.get("X-Conversation-Id");
+            const newMsgId = res.headers.get("X-Message-Id");
+            if (newConvId) setConversationId(newConvId);
 
-            if (data.status === "done") {
+            const reader = res.body?.getReader();
+            const decoder = new TextDecoder();
+            let full = "";
+
+            if (reader) {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    full += decoder.decode(value, { stream: true });
+                    updateMessage(localId, { streamingText: full });
+                }
+            }
+
+            const structured = AnswerSchema.safeParse(
+                JSON.parse(full.replace(/```json|```/g, "").trim())
+            );
+
+            if (structured.success) {
                 updateMessage(localId, {
-                    dbId: data.id,
+                    dbId: newMsgId ?? dbId,
                     status: "done",
-                    structured: data.structured_response,
+                    structured: structured.data,
+                    streamingText: undefined,
                 });
             } else {
                 updateMessage(localId, {
-                    dbId: data.id,
+                    dbId: newMsgId ?? dbId,
                     status: "error",
-                    rawResponse: data.raw_response,
-                    errorMessage: data.error ?? "AI không trả lời được.",
+                    rawResponse: full,
+                    errorMessage: "AI trả về định dạng không đúng chuẩn",
+                    streamingText: undefined,
                 });
             }
         } catch (err) {
             updateMessage(localId, {
                 status: "error",
                 errorMessage: err instanceof Error ? err.message : "Không kết nối được máy chủ",
+                streamingText: undefined,
             });
         }
     }
@@ -152,14 +181,14 @@ export default function ChatWindow() {
 
     return (
         <div className="flex h-full flex-col">
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
                 {historyLoading ? (
-                    <div className="space-y-3 animate-pulse">
-                        <div className="h-8 w-1/2 ml-auto rounded bg-gray-100" />
-                        <div className="h-24 w-4/5 rounded bg-gray-100" />
+                    <div className="space-y-3">
+                        <div className="ml-auto h-9 w-1/2 animate-pulse rounded-2xl bg-slate-200" />
+                        <div className="h-28 w-4/5 animate-pulse rounded-2xl bg-white shadow-sm" />
                     </div>
                 ) : messages.length === 0 ? (
-                    <div>
+                    <div className="flex h-full flex-col items-center justify-center gap-4">
                         <EmptyState
                             title="Chưa có tin nhắn nào"
                             description="Chọn tài liệu bên cạnh rồi đặt câu hỏi, hoặc thử một gợi ý:"
@@ -169,7 +198,7 @@ export default function ChatWindow() {
                                 <button
                                     key={q}
                                     onClick={() => handleSend(q)}
-                                    className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100"
+                                    className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:border-indigo-300 hover:text-indigo-600"
                                 >
                                     {q}
                                 </button>
@@ -177,30 +206,34 @@ export default function ChatWindow() {
                         </div>
                     </div>
                 ) : (
-                    messages.map((m) => (
-                        <MessageBubble key={m.id} message={m} onRegenerate={handleRegenerate} />
-                    ))
+                    <div className="mx-auto max-w-3xl space-y-6">
+                        {messages.map((m) => (
+                            <MessageBubble key={m.id} message={m} onRegenerate={handleRegenerate} />
+                        ))}
+                    </div>
                 )}
                 <div ref={bottomRef} />
             </div>
 
-            <div className="border-t border-gray-200 p-3">
-                {notice && <p className="mb-2 text-xs text-red-600">{notice}</p>}
-                <div className="flex gap-2">
-                    <input
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSend(input)}
-                        placeholder="Đặt câu hỏi về tài liệu đã chọn..."
-                        className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-black"
-                    />
-                    <button
-                        onClick={() => handleSend(input)}
-                        disabled={hasLoading || !input.trim()}
-                        className="rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-40"
-                    >
-                        {hasLoading ? "..." : "Gửi"}
-                    </button>
+            <div className="border-t border-slate-200 bg-white p-3 md:p-4">
+                <div className="mx-auto max-w-3xl">
+                    {notice && <p className="mb-2 text-xs font-medium text-red-500">{notice}</p>}
+                    <div className="flex gap-2">
+                        <input
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSend(input)}
+                            placeholder="Đặt câu hỏi về tài liệu đã chọn..."
+                            className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                        />
+                        <button
+                            onClick={() => handleSend(input)}
+                            disabled={hasLoading || !input.trim()}
+                            className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            {hasLoading ? "..." : "Gửi"}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
