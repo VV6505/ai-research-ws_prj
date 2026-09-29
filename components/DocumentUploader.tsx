@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useDocumentsStore } from "@/lib/store/useDocumentsStore";
+import toast from 'react-hot-toast';
 
 type UploadStatus = "uploading" | "extracting" | "done" | "error";
 
@@ -40,10 +41,7 @@ export default function DocumentUploader() {
             );
 
             if (!isAllowed) {
-                setUploads((prev) => [
-                    ...prev,
-                    { fileName: file.name, status: "error", errorMessage: "Chỉ hỗ trợ .txt, .pdf, .docx" },
-                ]);
+                toast.error(`File ${file.name} bị lỗi: Chỉ hỗ trợ .txt, .pdf, .docx`);
                 continue;
             }
 
@@ -87,13 +85,14 @@ export default function DocumentUploader() {
                 setUploads((prev) =>
                     prev.map((u) => (u.fileName === file.name ? { ...u, status: "done" } : u))
                 );
+
+                setTimeout(() => {
+                    setUploads((prev) => prev.filter((u) => u.fileName !== file.name));
+                }, 1000);
             } catch (err) {
                 const message = err instanceof Error ? err.message : "Lỗi không xác định";
-                setUploads((prev) =>
-                    prev.map((u) =>
-                        u.fileName === file.name ? { ...u, status: "error", errorMessage: message } : u
-                    )
-                );
+                toast.error(`Tải lên ${file.name} thất bại: ${message}`);
+                setUploads((prev) => prev.filter((u) => u.fileName !== file.name));
             }
         }
     }

@@ -63,7 +63,8 @@ ${context}
 
 Câu hỏi: ${question}
 
-Hãy trả lời theo đúng cấu trúc: tóm tắt (summary), các điểm chính (key_points), rủi ro nếu có (risks), hành động đề xuất (actions).
+Hãy trả lời theo đúng cấu trúc JSON được yêu cầu.
+LƯU Ý CỰC KỲ QUAN TRỌNG: TẤT CẢ các trường dữ liệu (summary, key_points, risks, actions) TUYỆT ĐỐI PHẢI VIẾT BẰNG TIẾNG VIỆT CÓ DẤU ĐẦY ĐỦ. Không được phép viết tiếng Việt không dấu.
 
 Nếu câu hỏi yêu cầu trích dẫn nguyên văn hoặc giải thích 1 chi tiết cụ thể, hãy đặt nội dung chính vào "summary", để key_points/risks/actions trống nếu không có nội dung phù hợp — không cố bịa thêm nội dung không liên quan chỉ để lấp đầy khuôn.`;
 
