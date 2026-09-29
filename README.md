@@ -1,5 +1,8 @@
 # AI Research Workspace
 
+**Live Demo URL**: [https://ai-research-ws-prj.vercel.app/] 
+**GitHub Repository**: [https://github.com/VV6505/ai-research-ws_prj.git]
+
 A modern web application built for the **7-Day AI Builder Challenge** that helps users efficiently analyze, summarize, and extract actionable insights from multiple documents using AI.
 
 ## 1. The Problem
@@ -28,20 +31,24 @@ Professionals, researchers, and students often spend hours reading lengthy docum
 5. The server streams the response from Gemini in structured JSON format.
 6. The frontend *partially parses* the streaming JSON on-the-fly and renders the structured UI progressively.
 
-## 4. Completed Work & Features
--  **Authentication**: Secure Email/Password login. Built to support robust Row Level Security (RLS) preventing users from seeing each other's files.
--  **Document Management**: Upload parser (PDF, DOCX, TXT) and a Bulk Delete function with modern 3-dot dropdown UI (NotebookLM style).
--  **Structured AI Responses**: Enforced JSON schema via Zod. Strict prompt engineering ensures the retention of Vietnamese diacritics (UTF-8).
--  **Streaming UI**: Custom partial JSON parser allows structured UI rendering during the stream.
--  **Robust Error Handling**: Toast notifications (`react-hot-toast`) for network, upload, and processing errors. Multi-model fallback and exponential backoff retry for Google API 503/429 errors.
--  **UX & Accessibility (Bonus)**: High-contrast text colors to meet WCAG standards, touch-friendly elements (removed hover-only dependencies for mobile), and auto-hiding upload statuses.
--  **Chat History**: Persisted and secured via Supabase.
+## 4. AI Usage
+- **Google Gemini**: Used as the core engine for document analysis, summarization, and extracting structured JSON data.
+- **AI Coding Assistants**: Used extensively for architectural brainstorming, troubleshooting edge cases (e.g., Supabase RLS policies, React hydration errors, and Mobile UX optimization). *See `AI_WORKLOG.md` for full details.*
 
-## 5. Limitations
+## 5. Completed Work & Features
+- ✅ **Authentication**: Secure Email/Password login. Built to support robust Row Level Security (RLS) preventing users from seeing each other's files.
+- ✅ **Document Management**: Upload parser (PDF, DOCX, TXT) and a Bulk Delete function with modern 3-dot dropdown UI (NotebookLM style).
+- ✅ **Structured AI Responses**: Enforced JSON schema via Zod. Strict prompt engineering ensures the retention of Vietnamese diacritics (UTF-8).
+- ✅ **Streaming UI**: Custom partial JSON parser allows structured UI rendering during the stream.
+- ✅ **Robust Error Handling**: Toast notifications (`react-hot-toast`) for network, upload, and processing errors. Multi-model fallback and exponential backoff retry for Google API 503/429 errors.
+- ✅ **UX & Accessibility (Bonus)**: High-contrast text colors to meet WCAG standards, touch-friendly elements (removed hover-only dependencies for mobile). Fixed iOS virtual keyboard overlap issue.
+- ✅ **Chat History**: Persisted and secured via Supabase.
+
+## 6. Limitations
 - **Token Limits**: Currently, the entire extracted text is sent to the LLM. Extremely large documents might exceed the context window. (Future fix: Implement RAG with pgvector).
 - **Image/Table parsing**: The current parser (`pdf-parse`) only extracts plain text, ignoring images and complex table structures in PDFs.
 
-## 6. How to Run Locally
+## 7. How to Run Locally
 1. Clone the repository.
 2. Run `npm install`.
 3. Create a `.env.local` file with your Supabase and Gemini credentials.
