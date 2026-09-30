@@ -51,7 +51,7 @@ export default function AuthForm() {
                         <input
                             type="email"
                             required
-                            className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-indigo-500 focus:outline-none"
+                            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -61,7 +61,7 @@ export default function AuthForm() {
                         <input
                             type="password"
                             required
-                            className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-indigo-500 focus:outline-none"
+                            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />

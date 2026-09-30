@@ -229,7 +229,7 @@ export default function ChatWindow() {
                                 }, 300);
                             }}
                             placeholder="Đặt câu hỏi về tài liệu đã chọn..."
-                            className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-base md:text-sm outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                            className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-base text-slate-900 placeholder:text-slate-400 md:text-sm outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                         />
                         <button
                             onClick={() => handleSend(input)}
