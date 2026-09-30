@@ -5,9 +5,11 @@ import DocumentUploader from "@/components/DocumentUploader";
 import DocumentList from "@/components/DocumentList";
 import ChatWindow from "@/components/ChatWindow";
 import { createClient } from "@/lib/supabase/client";
+import { useViewportHeight } from "@/lib/useViewportHeight";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const viewportHeight = useViewportHeight();
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -16,7 +18,10 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-dvh flex-col bg-slate-50 md:flex-row">
+    <div
+      className="flex flex-col bg-slate-50 md:flex-row md:h-dvh"
+      style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}
+    >
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
