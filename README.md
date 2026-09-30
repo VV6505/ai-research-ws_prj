@@ -9,6 +9,17 @@
 
 A web application built for the **7-Day AI Builder Challenge** that helps users analyze, summarize, and extract structured insights from multiple documents using AI.
 
+## Submission Checklist
+
+| Deliverable | Where to find it |
+|---|---|
+| Live URL | https://ai-research-ws-prj.vercel.app/ (demo account above, or register a new one) |
+| Source code | https://github.com/VV6505/ai-research-ws_prj |
+| Architecture description | [Section 3 — Architecture & Workflow](#3-architecture--workflow) below |
+| README | [README.md](./README.md) |
+| Demo video (≤ 5 min) | *[add video link here — YouTube/Drive/Loom]* |
+| `AI_WORKLOG.md` | [AI_WORKLOG.md](./AI_WORKLOG.md) — tools used, how AI helped, incorrect outputs and how they were fixed, 7-day improvement plan |
+
 ## 1. The Problem
 Professionals, researchers, and students often spend hours reading lengthy documents (PDFs, DOCX) to find key information, risks, and next steps. Organizing this information manually is tedious and time-consuming.
 
@@ -74,19 +85,19 @@ dung phù hợp — không cố bịa thêm nội dung không liên quan chỉ �
 - **AI coding assistants** (Claude, Antigravity) — used throughout for architecture decisions, code generation, and debugging real runtime errors (see `AI_WORKLOG.md` for the full, honest account, including mistakes and how they were caught and fixed).
 
 ## 5. Completed Work & Features
-- Document upload (.txt, .pdf, .docx) with per-file progress and error states
-- Chat with AI grounded in selected document(s)
-- **Streaming AI responses**, including progressive rendering of the structured UI while streaming (bonus)
-- Structured JSON enforced via Gemini `responseSchema` + Zod validation, rendered as color-coded cards — never raw JSON
-- Conversation history persisted in Supabase, restored on page refresh
-- Regenerate an answer — overwrites the same DB row in place, does not duplicate or move position in the thread
-- Copy an answer to clipboard (plain-text formatted)
-- Loading / empty / error states across every async interaction
-- Responsive: two-column layout on desktop, collapsible sidebar drawer on mobile; fixed mobile keyboard covering the chat input using `visualViewport`
-- Multi-model fallback + exponential backoff retry for Gemini 429/503 errors
-- Email/Password authentication with Row Level Security isolating each user's documents and conversations
-- **Optimistic UI (bonus)** — user messages and loading placeholders render instantly on send
-- **Accessibility fix (bonus)** — forced light `color-scheme` and explicit text colors on all inputs to prevent OS dark-mode from producing low-contrast, hard-to-read form fields on mobile
+- ✅ Document upload (.txt, .pdf, .docx) with per-file progress and error states
+- ✅ Chat with AI grounded in selected document(s)
+- ✅ **Streaming AI responses**, including progressive rendering of the structured UI while streaming (bonus)
+- ✅ Structured JSON enforced via Gemini `responseSchema` + Zod validation, rendered as color-coded cards — never raw JSON
+- ✅ Conversation history persisted in Supabase, restored on page refresh
+- ✅ Regenerate an answer — overwrites the same DB row in place, does not duplicate or move position in the thread
+- ✅ Copy an answer to clipboard (plain-text formatted)
+- ✅ Loading / empty / error states across every async interaction
+- ✅ Responsive: two-column layout on desktop, collapsible sidebar drawer on mobile; fixed mobile keyboard covering the chat input using `visualViewport`
+- ✅ Multi-model fallback + exponential backoff retry for Gemini 429/503 errors
+- ✅ Email/Password authentication with Row Level Security isolating each user's documents and conversations
+- ✅ **Optimistic UI (bonus)** — user messages and loading placeholders render instantly on send
+- ✅ **Accessibility fix (bonus)** — forced light `color-scheme` and explicit text colors on all inputs to prevent OS dark-mode from producing low-contrast, hard-to-read form fields on mobile
 
 ## 6. Edge Cases Handled
 - No document selected → blocked client-side with an inline warning, no API call made
