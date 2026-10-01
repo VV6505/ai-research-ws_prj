@@ -17,7 +17,7 @@ A web application built for the **7-Day AI Builder Challenge** that helps users 
 | Source code | https://github.com/VV6505/ai-research-ws_prj |
 | Architecture description | [Section 3 — Architecture & Workflow](#3-architecture--workflow) below |
 | README | [README.md](./README.md) |
-| Demo video (≤ 5 min) | *[add video link here — YouTube/Drive/Loom]* |
+| Demo video (≤ 5 min) | *[https://drive.google.com/file/d/1BAYOwc6fVWF3S4aYi0SOIAZPNV-_LP5v/view?usp=sharing]* |
 | `AI_WORKLOG.md` | [AI_WORKLOG.md](./AI_WORKLOG.md) — tools used, how AI helped, incorrect outputs and how they were fixed, 7-day improvement plan |
 
 ## 1. The Problem
